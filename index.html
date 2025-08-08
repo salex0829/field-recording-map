@@ -50,6 +50,29 @@
           map,
           title: data.title
         });
+        
+console.log("▶️ 再生URLチェック:", data.audioUrl); // これを追加！
+
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'info';
+  infoDiv.innerHTML = `
+    <h3>${data.title}</h3>
+    <p>${data.description}</p>
+    <audio controls>
+      <source src="${data.audioUrl}" type="audio/mp3">
+      このブラウザでは audio タグがサポートされていません。
+    </audio>
+  `;
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: infoDiv
+  });
+
+  marker.addListener("click", () => {
+    infoWindow.open(map, marker);
+  });
+}
+      
 
         const infoDiv = document.createElement('div');
         infoDiv.className = 'info';
