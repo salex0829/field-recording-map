@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Field Recording Map with Firebase</title>
+    <style>
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
+      .info {
+        width: 250px;
+      }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // ✅ 1. Firebase 設定（あなたのプロジェクトで書き換える）
+      const firebaseConfig = {
+        apiKey: "YOUR_FIREBASE_API_KEY",
+        authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
+        projectId: "YOUR_FIREBASE_PROJECT",
+        storageBucket: "YOUR_FIREBASE_PROJECT.appspot.com",
+        messagingSenderId: "SENDER_ID",
+        appId: "APP_ID"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      let map;
+      let tempMarker;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 12,
+          center: { lat: 33.1591, lng: 129.7225 }
+        });
+
+        map.addListener("click", (e) => {
+          if (tempMarker) tempMarker.setMap(null);
+          tempMarker = new google.maps.Marker({
+            position: e.latLng,
+            map
+          });
+
+          const formHtml = `
+            <div class="info">
+              <h3>新しい音源を追加</h3>
+              <label>タイトル: <input id="title" type="text"></label><br/>
+              <label>説明: <input id="desc" type="text"></label><br/>
+              <label>Google Drive ID: <input id="audioId" type="text"></label><br/>
+              <button onclick="submitForm()">追加</button>
+            </div>
+          `;
+
+          const infoWindow = new google.maps.InfoWindow({
+            content: formHtml,
+            position: e.latLng
+          });
+
+          infoWindow.open(map, tempMarker);
+        });
+
+        loadMarkersFromFirestore();
+      }
+
+      function submitForm() {
+        const title = document.getElementById("title").value;
+        const desc = document.getElementById("desc").value;
+        const audioId = document.getElementById("audioId").value;
+        const audioUrl = `https://drive.google.com/uc?export=preview&id=${audioId}`;
+        const position = tempMarker.getPosition().toJSON();
+
+        db.collection("markers").add({
+          title: title,
+          description: desc,
+          audioUrl: audioUrl,
+          position: position,
+          timestamp: new Date()
+        }).then(() => {
+          addMarkerWithInfo({ title, description: desc, audioUrl, position });
+          tempMarker.setMap(null);
+        });
+      }
+
+      function addMarkerWithInfo(data) {
+        const marker = new google.maps.Marker({
+          position: data.position,
+          map,
+          title: data.title
+        });
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'info';
+        infoDiv.innerHTML = `
+          <h3>${data.title}</h3>
+          <p>${data.description}</p>
+          <audio controls>
+            <source src="${data.audioUrl}" type="audio/mp3">
+            Your browser does not support the audio element.
+          </audio><br/>
+        `;
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: infoDiv
+        });
+
+        marker.addListener("click", () => {
+          infoWindow.open(map, marker);
+        });
+      }
+
+      function loadMarkersFromFirestore() {
+        db.collection("markers").orderBy("timestamp").get().then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            addMarkerWithInfo(data);
+          });
+        });
+      }
+    </script>
+
+    <!-- Google Maps -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"
+      async
+      defer>
+    </script>
+  </body>
+</html>
