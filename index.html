@@ -22,12 +22,12 @@
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyDrsgTV-hPSjp2mmE5-S-Ck5lLGyKTPzgM",
-  authDomain: "sasebo-soundscape-22f8c.firebaseapp.com",
-  projectId: "sasebo-soundscape-22f8c",
-  storageBucket: "sasebo-soundscape-22f8c.firebasestorage.app",
-  messagingSenderId: "865266990069",
-  appId: "1:865266990069:web:71d936591c2b46a8333ebc",
-  measurementId: "G-82DNZ74NEB"
+        authDomain: "sasebo-soundscape-22f8c.firebaseapp.com",
+        projectId: "sasebo-soundscape-22f8c",
+        storageBucket: "sasebo-soundscape-22f8c.firebasestorage.app",
+        messagingSenderId: "865266990069",
+        appId: "1:865266990069:web:71d936591c2b46a8333ebc",
+        measurementId: "G-82DNZ74NEB"
       };
 
       firebase.initializeApp(firebaseConfig);
@@ -50,29 +50,8 @@
           map,
           title: data.title
         });
-        
-console.log("▶️ 再生URLチェック:", data.audioUrl); // これを追加！
 
-  const infoDiv = document.createElement('div');
-  infoDiv.className = 'info';
-  infoDiv.innerHTML = `
-    <h3>${data.title}</h3>
-    <p>${data.description}</p>
-    <audio controls>
-      <source src="${data.audioUrl}" type="audio/mp3">
-      このブラウザでは audio タグがサポートされていません。
-    </audio>
-  `;
-
-  const infoWindow = new google.maps.InfoWindow({
-    content: infoDiv
-  });
-
-  marker.addListener("click", () => {
-    infoWindow.open(map, marker);
-  });
-}
-      
+        console.log("▶️ 再生URLチェック:", data.audioUrl);
 
         const infoDiv = document.createElement('div');
         infoDiv.className = 'info';
@@ -104,10 +83,10 @@ console.log("▶️ 再生URLチェック:", data.audioUrl); // これを追加�
       }
     </script>
 
+    <!-- Google Maps -->
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-sOvPhVoIyjU4C34gFbFmBOriWYOJgW0&callback=initMap"
-      async
-      defer>
+      async defer>
     </script>
   </body>
 </html>
